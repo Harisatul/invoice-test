@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"invoice-test/internal/model"
 	"invoice-test/pkg"
 	"log/slog"
@@ -56,6 +57,14 @@ func (s Service) CreateInvoice(ctx context.Context, request model.CreateInvoiceR
 	if err = tx.Commit(ctx); err != nil {
 		slog.ErrorContext(ctx, "failed to commit transaction : ", err)
 	}
-
 	return insertInvoice, nil
+}
+
+func (s Service) DeleteInvoice(ctx context.Context, id string) error {
+	row, err := s.Querier.DeleteInvoice(ctx, id)
+	if row.RowsAffected() == 0 {
+		slog.WarnContext(ctx, "failed to delete Invoice : ", err)
+		return errors.New("given id not found")
+	}
+	return nil
 }

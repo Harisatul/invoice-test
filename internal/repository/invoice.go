@@ -46,3 +46,11 @@ func (q *Queries) InsertProduct(ctx context.Context, arg model.Product) (pgconn.
 		arg.InvoiceNumber,
 	)
 }
+
+const deleteInvoiceQuery = `
+	DELETE FROM invoice WHERE invoice_number = $1
+`
+
+func (q *Queries) DeleteInvoice(ctx context.Context, id string) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, deleteInvoiceQuery, id)
+}
