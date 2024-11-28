@@ -3,16 +3,46 @@ package repository
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgconn"
+	"invoice-test/internal/model"
 )
 
 const insertInvoiceQuery = `
-	
+	INSERT INTO invoice (invoice_number, date, customer_name, salesperson, notes, payment_type)
+VALUES ($1, $2, $3, $4, $5, $6) RETURNING invoice_number;
 `
 
-type InsertInvoiceParams struct {
-	ID int32
+func (q *Queries) InsertInvoice(ctx context.Context, arg model.Invoice) (string, error) {
+	var invoiceNumber string
+	err := q.db.QueryRow(ctx, insertInvoiceQuery,
+		arg.InvoiceNumber,
+		arg.Date,
+		arg.CustomerName,
+		arg.Salesperson,
+		arg.Notes,
+		arg.PaymentType,
+	).Scan(&invoiceNumber)
+	return invoiceNumber, err
 }
 
-func (q *Queries) InsertInvoice(ctx context.Context, arg InsertInvoiceParams) (pgconn.CommandTag, error) {
-	return q.db.Exec(ctx, insertInvoiceQuery, arg.ID)
+type PaymentStatus string
+
+const (
+	PaymentStatusCASH   PaymentStatus = "CASH"
+	PaymentStatusCREDIT PaymentStatus = "CREDIT"
+)
+
+const insertProductQuery = `
+	INSERT INTO product (id, item_name, quantity, total_cogs, total_price_sold, invoice_number)
+VALUES ($1, $2, $3, $4, $5, $6)
+`
+
+func (q *Queries) InsertProduct(ctx context.Context, arg model.Product) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, insertProductQuery,
+		arg.ID,
+		arg.ItemName,
+		arg.Quantity,
+		arg.TotalCOGS,
+		arg.TotalPriceSold,
+		arg.InvoiceNumber,
+	)
 }

@@ -1,0 +1,23 @@
+env: dev # dev, prod
+
+server:
+  port: :8081
+  timezone: "Asia/Jakarta"
+  read_timeout: 2
+  write_timeout: 3
+
+log:
+  level: -4 # -4 DEBUG, 0 INFO, 4 WARN, 8 ERROR
+
+db:
+  user: postgres
+  password: haris123
+  host: localhost
+  port: 5432
+  name: postgres
+  pool:
+    min: 2
+    max: 5
+    max_idle_time: 5m
+    max_life_time: 1h
+

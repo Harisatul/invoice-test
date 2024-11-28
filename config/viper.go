@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func newViper(name string) *viper.Viper {
+func NewViper(name string) *viper.Viper {
 	config := viper.New()
 
 	config.SetConfigName(name)

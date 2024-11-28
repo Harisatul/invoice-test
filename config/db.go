@@ -7,19 +7,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-func newDb(ctx context.Context, cfg *viper.Viper) *pgxpool.Pool {
+func NewDb(ctx context.Context, cfg *viper.Viper) *pgxpool.Pool {
 	username := cfg.GetString("db.user")
 	password := cfg.GetString("db.password")
 	host := cfg.GetString("db.host")
-	port := cfg.GetString("db.port")
+	port := cfg.GetInt("db.port")
 	database := cfg.GetString("db.name")
-	maxConn := cfg.GetString("db.pool.max")
-	minConn := cfg.GetString("db.pool.min")
+	maxConn := cfg.GetInt("db.pool.max")
+	minConn := cfg.GetInt("db.pool.min")
 	timezone := cfg.GetString("server.timezone")
 	maxIdleTime := cfg.GetString("db.pool.max_idle_time")
 	maxConnLifetime := cfg.GetDuration("db.pool.max_conn_lifetime")
 
-	connTemplate := "postgres://%s:%s@%s:%d/%s?pool_max_conns=%d&pool_min_conns=%d&timezone=%s&pool_max_conn_lifetime=%s&pool_max_connection_idle=%s"
+	//connTemplate := "postgres://%s:%s@%s:%d/%s?pool_max_conns=%d&pool_min_conns=%d&timezone=%s&pool_max_conn_lifetime=%s&pool_max_connection_idle=%s"
+	connTemplate := "postgres://%s:%s@%s:%d/%s?pool_max_conns=%d&pool_min_conns=%d&timezone=%s&pool_max_conn_lifetime=%s&pool_max_conn_idle_time=%s"
 	connString := fmt.Sprintf(connTemplate, username, password, host, port, database, maxConn, minConn, timezone, maxConnLifetime, maxIdleTime)
 
 	pool, err := pgxpool.New(ctx, connString)

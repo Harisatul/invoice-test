@@ -1,0 +1,2 @@
+INSERT INTO invoice (invoice_number, date, customer_name, salesperson, notes, payment_type)
+VALUES ('XNV-T21-01010', '2024-05-01', 'Harisatul Aulia', 'Pak Rusli', 'Notes in the end of the things', 'CASH')
