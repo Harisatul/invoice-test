@@ -11,5 +11,5 @@ type Handler struct {
 }
 
 func (h Handler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	pkg.WriteSuccessResponse(w, http.StatusOK, "success", "hello from server 👋")
+	pkg.WriteSuccessResponse(w, http.StatusOK, "success", "hello from server 👋", nil)
 }

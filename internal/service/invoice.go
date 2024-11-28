@@ -128,3 +128,20 @@ func (s Service) UpdateInvoice(ctx context.Context, arg model.UpdateInvoiceReque
 	}
 	return invoice.InvoiceNumber, nil
 }
+
+func (s Service) GetAllInvoice(ctx context.Context, startTime time.Time, endTime time.Time, page, size int) (model.GetInvoiceResponse, model.PaginationIndex, error) {
+	count, err := s.Querier.CountAllInvoiceWithGivenDate(ctx, startTime, endTime)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to count invoices : ", err)
+	}
+	date, err := s.Querier.GetAllInvoiceWithGivenDate(ctx, startTime, endTime, page, size)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to get invoices : ", err)
+	}
+	pagination := pkg.CalculatePagination(page, size, int(count))
+
+	response := model.GetInvoiceResponse{
+		Invoice: date,
+	}
+	return response, pagination, nil
+}

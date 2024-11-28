@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v5/pgconn"
 	"invoice-test/internal/model"
 	"time"
@@ -81,4 +82,60 @@ WHERE invoice_number = $1
 
 func (q *Queries) DeleteProduct(ctx context.Context, id string) (pgconn.CommandTag, error) {
 	return q.db.Exec(ctx, deleteProductQuery, id)
+}
+
+const countAllInvoiceWithGivenDateQuery = `
+SELECT COUNT(*) FROM invoice WHERE date BETWEEN $1 AND $2;
+`
+
+func (q *Queries) CountAllInvoiceWithGivenDate(ctx context.Context, startDate time.Time, endDate time.Time) (int64, error) {
+	var count int64
+	return count, q.db.QueryRow(ctx, countAllInvoiceWithGivenDateQuery, startDate, endDate).Scan(&count)
+}
+
+const countAllInvoiceWithGivenDateAndCashOnlyQuery = `
+SELECT COUNT(*) FROM invoice WHERE payment_type= 'CASH' AND date BETWEEN $1 AND $2;
+`
+
+func (q *Queries) CountAllInvoiceWithGivenDateAndCashOnly(ctx context.Context, startDate time.Time, endDate time.Time) (int64, error) {
+	var count int64
+	return count, q.db.QueryRow(ctx, countAllInvoiceWithGivenDateAndCashOnlyQuery, startDate, endDate).Scan(&count)
+}
+
+const getAllInvoiceWithPagination = `
+SELECT invoice_number, date, customer_name, salesperson, notes, payment_type
+FROM invoice WHERE date BETWEEN $1 AND $2
+LIMIT $3 OFFSET $4;	
+`
+
+func (q *Queries) GetAllInvoiceWithGivenDate(ctx context.Context, startDate time.Time, endDate time.Time, page, size int) ([]model.Invoice, error) {
+
+	offset := (page - 1) * size
+
+	rows, err := q.db.Query(ctx, getAllInvoiceWithPagination, startDate, endDate, size, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error when querying: %w", err)
+	}
+	defer rows.Close()
+
+	var invoices []model.Invoice
+	for rows.Next() {
+		var invoice model.Invoice
+		err := rows.Scan(
+			&invoice.InvoiceNumber,
+			&invoice.Date,
+			&invoice.CustomerName,
+			&invoice.Salesperson,
+			&invoice.Notes,
+			&invoice.PaymentType,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error when scanning: %w", err)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error when scanning: %w", err)
+	}
+
+	return invoices, nil
 }

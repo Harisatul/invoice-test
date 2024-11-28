@@ -39,13 +39,27 @@ func ToPaymentStatus(input string) (model.PaymentStatus, error) {
 	}
 }
 
-func WriteSuccessResponse(w http.ResponseWriter, status int, message string, data interface{}) {
+func CalculatePagination(page, pageSize, totalCount int) model.PaginationIndex {
+	// Calculate pagination metadata
+	totalPages := (totalCount + pageSize - 1) / pageSize
+	return model.PaginationIndex{
+		Page:        page,
+		PageSize:    pageSize,
+		TotalCount:  totalCount,
+		TotalPages:  totalPages,
+		HasPrevious: page > 1,
+		HasNext:     page < totalPages,
+	}
+}
+
+func WriteSuccessResponse(w http.ResponseWriter, status int, message string, data interface{}, index interface{}) {
 	w.Header().Add("content-type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(model.APIResponse{
-		Status:  status,
-		Message: message,
-		Data:    data,
+		Status:          status,
+		Message:         message,
+		Data:            data,
+		PaginationIndex: index,
 	})
 }
 
