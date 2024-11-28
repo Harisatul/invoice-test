@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
 	"invoice-test/internal/service"
+	"invoice-test/pkg"
 	"net/http"
 )
 
@@ -11,6 +11,5 @@ type Handler struct {
 }
 
 func (h Handler) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode("Hello From server 👋")
+	pkg.WriteSuccessResponse(w, http.StatusOK, "success", "hello from server 👋")
 }

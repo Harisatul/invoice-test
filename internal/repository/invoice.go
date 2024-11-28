@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgconn"
 	"invoice-test/internal/model"
+	"time"
 )
 
 const insertInvoiceQuery = `
@@ -53,4 +54,31 @@ const deleteInvoiceQuery = `
 
 func (q *Queries) DeleteInvoice(ctx context.Context, id string) (pgconn.CommandTag, error) {
 	return q.db.Exec(ctx, deleteInvoiceQuery, id)
+}
+
+const updateInvoiceQuery = `
+UPDATE invoice
+SET date = $2, customer_name = $3, salesperson = $4, notes = $5, updated_at = $6, payment_type = $7 
+WHERE invoice_number = $1
+`
+
+func (q *Queries) UpdateInvoice(ctx context.Context, arg model.Invoice) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, updateInvoiceQuery,
+		arg.InvoiceNumber,
+		arg.Date,
+		arg.CustomerName,
+		arg.Salesperson,
+		arg.Notes,
+		time.Now(),
+		arg.PaymentType,
+	)
+}
+
+const deleteProductQuery = `
+DELETE FROM product
+WHERE invoice_number = $1
+`
+
+func (q *Queries) DeleteProduct(ctx context.Context, id string) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, deleteProductQuery, id)
 }

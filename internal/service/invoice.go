@@ -68,3 +68,63 @@ func (s Service) DeleteInvoice(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+func (s Service) UpdateInvoice(ctx context.Context, arg model.UpdateInvoiceRequest, params string) (string, error) {
+
+	tx, err := s.Db.Begin(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to begin transaction : ", err)
+		return "", err
+	}
+	defer tx.Rollback(ctx)
+
+	status, err := pkg.ToPaymentStatus(arg.PaymentType)
+	if err != nil {
+		return "", err
+	}
+
+	invoice := model.Invoice{
+		InvoiceNumber: params,
+		Date:          time.Now(),
+		CustomerName:  arg.CustomerName,
+		Salesperson:   arg.SalesPersonName,
+		Notes:         arg.Notes,
+		PaymentType:   status,
+	}
+
+	qTx := s.Querier.WithTx(tx)
+	insertInvoice, err := qTx.UpdateInvoice(ctx, invoice)
+	if err != nil {
+		slog.WarnContext(ctx, "failed to update invoice : ", err)
+	}
+	if insertInvoice.RowsAffected() == 0 {
+		return "", errors.New("given id not found")
+	}
+	_, err = qTx.DeleteProduct(ctx, params)
+	if err != nil {
+		slog.WarnContext(ctx, "failed to update invoice : ", err)
+		return "", errors.New("failed to update invoice")
+	}
+	for _, product := range arg.Product {
+		id, err := pkg.GenerateId()
+		if err != nil {
+			return "", err
+		}
+		productModel := model.Product{
+			ID:             id,
+			ItemName:       product.Name,
+			Quantity:       product.Quantity,
+			TotalCOGS:      product.TotalCostOfGoodSold,
+			TotalPriceSold: product.TotalPriceSold,
+			InvoiceNumber:  invoice.InvoiceNumber,
+		}
+		_, err = qTx.InsertProduct(ctx, productModel)
+		if err != nil {
+			slog.ErrorContext(ctx, "failed to insert product : ", err)
+		}
+	}
+	if err = tx.Commit(ctx); err != nil {
+		slog.ErrorContext(ctx, "failed to commit transaction : ", err)
+	}
+	return invoice.InvoiceNumber, nil
+}

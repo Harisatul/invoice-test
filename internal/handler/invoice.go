@@ -34,3 +34,23 @@ func (h Handler) DeleteInvoice(w http.ResponseWriter, r *http.Request) {
 	pkg.WriteSuccessResponse(w, http.StatusOK, "success delete invoice", nil)
 	return
 }
+
+func (h Handler) UpdateInvoice(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	var updateInvoiceRequest model.UpdateInvoiceRequest
+	if err := json.NewDecoder(r.Body).Decode(&updateInvoiceRequest); err != nil {
+		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid json body", err)
+		return
+	}
+	invoice, err := h.Service.UpdateInvoice(r.Context(), updateInvoiceRequest, id)
+	if err != nil {
+		if err.Error() == "given id not found" || err.Error() == "invalid payment status" {
+			pkg.WriteErrorResponse(w, http.StatusBadRequest, "failed to update invoice", err.Error())
+			return
+		}
+		pkg.WriteErrorResponse(w, http.StatusInternalServerError, "failed to update invoice", err.Error())
+		return
+	}
+	pkg.WriteSuccessResponse(w, http.StatusOK, "success update invoice", invoice)
+	return
+}

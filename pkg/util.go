@@ -40,8 +40,8 @@ func ToPaymentStatus(input string) (model.PaymentStatus, error) {
 }
 
 func WriteSuccessResponse(w http.ResponseWriter, status int, message string, data interface{}) {
-	w.WriteHeader(status)
 	w.Header().Add("content-type", "application/json")
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(model.APIResponse{
 		Status:  status,
 		Message: message,
