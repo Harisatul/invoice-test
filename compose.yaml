@@ -2,12 +2,25 @@ version: '3.8'
 
 services:
 
+  invoice-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    networks:
+      - invoice-network
+    depends_on:
+      - invoice-test-db
+
+
   invoice-test-db:
     image: postgres:16.4-alpine3.20
     restart: on-failure
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: haris123
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
     volumes:
       - invoice_data:/var/lib/postgresql/data
@@ -16,3 +29,6 @@ services:
 
 volumes:
   invoice_data:
+
+networks:
+  invoice-network:

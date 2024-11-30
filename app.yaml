@@ -12,7 +12,7 @@ log:
 db:
   user: postgres
   password: haris123
-  host: localhost
+  host: 172.17.0.1
   port: 5432
   name: postgres
   pool:
