@@ -95,3 +95,26 @@ func (h Handler) GetInvoice(w http.ResponseWriter, r *http.Request) {
 	pkg.WriteSuccessResponse(w, http.StatusOK, "success update invoice", invoice, index)
 	return
 }
+
+func (h Handler) ImportXLSX(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		slog.Warn(err.Error())
+		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err)
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		slog.Warn(err.Error())
+		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err)
+	}
+	defer file.Close()
+
+	err = h.Service.ImportXLSX(r.Context(), file)
+
+	slog.InfoContext(r.Context(), "import excel file successfully", slog.String("filename", header.Filename))
+
+	pkg.WriteSuccessResponse(w, http.StatusOK, "success import excel file", "just for test, change it later", nil)
+}

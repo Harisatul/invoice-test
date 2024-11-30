@@ -3,9 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/xuri/excelize/v2"
 	"invoice-test/internal/model"
 	"invoice-test/pkg"
 	"log/slog"
+	"mime/multipart"
+	"strconv"
 	"time"
 )
 
@@ -166,4 +170,123 @@ func (s Service) GetAllInvoice(ctx context.Context, startTime time.Time, endTime
 		InvoiceAggregateResponse: aggregateResponse,
 	}
 	return response, pagination, nil
+}
+
+func (s Service) ImportXLSX(ctx context.Context, file multipart.File) error {
+	xlsxFile, err := excelize.OpenReader(file)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to open xlsx file : ", err)
+		return errors.New("failed to open xlsx file")
+	}
+	defer xlsxFile.Close()
+
+	sheetInvoiceName := xlsxFile.GetSheetName(0)
+	invoiceSheet, err := xlsxFile.Rows(sheetInvoiceName)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to read sheet invoice : ", err)
+	}
+
+	sheetProductName := xlsxFile.GetSheetName(1)
+	productSheet, err := xlsxFile.Rows(sheetProductName)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to read sheet product : ", err)
+	}
+
+	rowCount := 0
+	for invoiceSheet.Next() {
+
+		fmt.Println(rowCount)
+
+		// Skip the first row
+		if rowCount == 0 {
+			rowCount++
+			continue
+		}
+
+		columns, err := invoiceSheet.Columns()
+		if err != nil {
+			slog.ErrorContext(ctx, "failed to read columns: ", err)
+		}
+		var startDate time.Time
+		value := columns[1]
+		startDate, err = time.Parse("01-02-06", value)
+		if err != nil {
+			rowCount++
+			continue
+		}
+		status, err := pkg.ToPaymentStatus(columns[4])
+		if err != nil {
+			rowCount++
+			continue
+		}
+		invoice := model.Invoice{
+			InvoiceNumber: columns[0],
+			Date:          startDate,
+			CustomerName:  columns[2],
+			Salesperson:   columns[3],
+			Notes:         columns[5],
+			PaymentType:   status,
+		}
+		_, err = s.Querier.InsertInvoice(ctx, invoice)
+		if err != nil {
+			rowCount++
+			continue
+		}
+		rowCount++
+	}
+
+	productRowCount := 0
+	for productSheet.Next() {
+
+		fmt.Println(productRowCount)
+		if productRowCount == 0 {
+			productRowCount++
+			continue
+		}
+
+		columns, err := productSheet.Columns()
+		if err != nil {
+			slog.ErrorContext(ctx, "failed to read columns: ", err)
+		}
+		slog.InfoContext(ctx, "read columns: ", slog.String("column", columns[0]))
+
+		id, err := pkg.GenerateId()
+		if err != nil {
+			rowCount++
+			continue
+		}
+
+		quantity, err := strconv.Atoi(columns[2])
+		if err != nil {
+			rowCount++
+			continue
+		}
+
+		totalCogs, err := strconv.Atoi(columns[3])
+		if err != nil {
+			rowCount++
+			continue
+		}
+		totalPrice, err := strconv.Atoi(columns[4])
+		if err != nil {
+			rowCount++
+			continue
+		}
+
+		product := model.Product{
+			ID:             id,
+			ItemName:       columns[1],
+			Quantity:       quantity,
+			TotalCOGS:      int64(totalCogs),
+			TotalPriceSold: int64(totalPrice),
+			InvoiceNumber:  columns[0],
+		}
+		_, err = s.Querier.InsertProduct(ctx, product)
+		if err != nil {
+			productRowCount++
+			slog.ErrorContext(ctx, "failed to insert product : ", err)
+		}
+		productRowCount++
+	}
+	return nil
 }

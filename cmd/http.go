@@ -18,6 +18,7 @@ func RegisterRoute(mux *http.ServeMux, handler handler.Handler) {
 	mux.HandleFunc("DELETE /api/invoice", handler.DeleteInvoice)
 	mux.HandleFunc("PUT /api/invoice", handler.UpdateInvoice)
 	mux.HandleFunc("GET /api/invoice", handler.GetInvoice)
+	mux.HandleFunc("POST /api/invoice/import", handler.ImportXLSX)
 }
 
 func runHTTPServer(ctx context.Context) {
