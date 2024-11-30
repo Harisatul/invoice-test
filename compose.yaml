@@ -2,17 +2,17 @@ version: '3.8'
 
 services:
 
-  invoice-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    restart: on-failure
-    networks:
-      - invoice-network
-    depends_on:
-      - invoice-test-db
+#  invoice-service:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8081:8081"
+#    restart: on-failure
+#    networks:
+#      - invoice-network
+#    depends_on:
+#      - invoice-test-db
 
 
   invoice-test-db:

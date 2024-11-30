@@ -18,7 +18,7 @@ func (h Handler) CreateInvoice(w http.ResponseWriter, r *http.Request) {
 	}
 	invoice, err := h.Service.CreateInvoice(r.Context(), createInvoiceRequest)
 	if err != nil {
-		pkg.WriteErrorResponse(w, http.StatusInternalServerError, "create invoice", err)
+		pkg.WriteErrorResponse(w, http.StatusInternalServerError, "create invoice", err.Error())
 		return
 	}
 	pkg.WriteSuccessResponse(w, http.StatusOK, "success create invoice", invoice, nil)
@@ -101,14 +101,14 @@ func (h Handler) ImportXLSX(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		slog.Warn(err.Error())
-		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err)
+		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err.Error())
 		return
 	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		slog.Warn(err.Error())
-		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err)
+		pkg.WriteErrorResponse(w, http.StatusBadRequest, "invalid file", err.Error())
 	}
 	defer file.Close()
 
