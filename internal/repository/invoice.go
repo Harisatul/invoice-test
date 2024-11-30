@@ -132,10 +132,39 @@ func (q *Queries) GetAllInvoiceWithGivenDate(ctx context.Context, startDate time
 		if err != nil {
 			return nil, fmt.Errorf("error when scanning: %w", err)
 		}
+		invoices = append(invoices, invoice)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error when scanning: %w", err)
 	}
+	return invoices, nil
+}
 
+const getSumofAllInvoice = `
+SELECT invoice.invoice_number, p.total_cogs, p.total_price_sold
+FROM invoice
+JOIN public.product p on invoice.invoice_number = p.invoice_number
+WHERE date BETWEEN $1 AND $2;
+`
+
+func (q *Queries) GetSumofAllInvoice(ctx context.Context, startDate time.Time, endDate time.Time) ([]model.Product, error) {
+	rows, err := q.db.Query(ctx, getSumofAllInvoice, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var invoices []model.Product
+	for rows.Next() {
+		var inv model.Product
+		if err := rows.Scan(&inv.InvoiceNumber, &inv.TotalCOGS, &inv.TotalPriceSold); err != nil {
+			return nil, fmt.Errorf("failed to scan invoice row: %w", err)
+		}
+		invoices = append(invoices, inv)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating invoice rows: %w", err)
+	}
 	return invoices, nil
 }

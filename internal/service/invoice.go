@@ -138,10 +138,32 @@ func (s Service) GetAllInvoice(ctx context.Context, startTime time.Time, endTime
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to get invoices : ", err)
 	}
+	cahsOnly, err := s.Querier.CountAllInvoiceWithGivenDateAndCashOnly(ctx, startTime, endTime)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to count cash only invoices : ", err)
+
+	}
+	invoice, err := s.Querier.GetSumofAllInvoice(ctx, startTime, endTime)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to get invoices : ", err)
+	}
+
+	var sumOftotalCogs int64
+	var sumOftotalPrice int64
+	for _, inv := range invoice {
+		sumOftotalCogs += inv.TotalCOGS
+		sumOftotalPrice += inv.TotalPriceSold
+	}
+
 	pagination := pkg.CalculatePagination(page, size, int(count))
+	aggregateResponse := model.InvoiceAggregateResponse{
+		TotalProfit:            sumOftotalPrice - sumOftotalCogs,
+		TotalOfCashTransaction: cahsOnly,
+	}
 
 	response := model.GetInvoiceResponse{
-		Invoice: date,
+		Invoice:                  date,
+		InvoiceAggregateResponse: aggregateResponse,
 	}
 	return response, pagination, nil
 }
