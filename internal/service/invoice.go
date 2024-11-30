@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/xuri/excelize/v2"
 	"invoice-test/internal/model"
 	"invoice-test/pkg"
@@ -195,8 +194,6 @@ func (s Service) ImportXLSX(ctx context.Context, file multipart.File) error {
 	rowCount := 0
 	for invoiceSheet.Next() {
 
-		fmt.Println(rowCount)
-
 		// Skip the first row
 		if rowCount == 0 {
 			rowCount++
@@ -238,7 +235,6 @@ func (s Service) ImportXLSX(ctx context.Context, file multipart.File) error {
 	productRowCount := 0
 	for productSheet.Next() {
 
-		fmt.Println(productRowCount)
 		if productRowCount == 0 {
 			productRowCount++
 			continue
