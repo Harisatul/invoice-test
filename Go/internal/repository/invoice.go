@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgconn"
-	"invoice-test/internal/model"
+	model2 "invoice-test/internal/model"
 	"time"
 )
 
@@ -13,7 +13,7 @@ const insertInvoiceQuery = `
 VALUES ($1, $2, $3, $4, $5, $6) RETURNING invoice_number;
 `
 
-func (q *Queries) InsertInvoice(ctx context.Context, arg model.Invoice) (string, error) {
+func (q *Queries) InsertInvoice(ctx context.Context, arg model2.Invoice) (string, error) {
 	var invoiceNumber string
 	err := q.db.QueryRow(ctx, insertInvoiceQuery,
 		arg.InvoiceNumber,
@@ -38,7 +38,7 @@ const insertProductQuery = `
 VALUES ($1, $2, $3, $4, $5, $6)
 `
 
-func (q *Queries) InsertProduct(ctx context.Context, arg model.Product) (pgconn.CommandTag, error) {
+func (q *Queries) InsertProduct(ctx context.Context, arg model2.Product) (pgconn.CommandTag, error) {
 	return q.db.Exec(ctx, insertProductQuery,
 		arg.ID,
 		arg.ItemName,
@@ -63,7 +63,7 @@ SET date = $2, customer_name = $3, salesperson = $4, notes = $5, updated_at = $6
 WHERE invoice_number = $1
 `
 
-func (q *Queries) UpdateInvoice(ctx context.Context, arg model.Invoice) (pgconn.CommandTag, error) {
+func (q *Queries) UpdateInvoice(ctx context.Context, arg model2.Invoice) (pgconn.CommandTag, error) {
 	return q.db.Exec(ctx, updateInvoiceQuery,
 		arg.InvoiceNumber,
 		arg.Date,
@@ -108,7 +108,7 @@ FROM invoice WHERE date BETWEEN $1 AND $2
 LIMIT $3 OFFSET $4;	
 `
 
-func (q *Queries) GetAllInvoiceWithGivenDate(ctx context.Context, startDate time.Time, endDate time.Time, page, size int) ([]model.Invoice, error) {
+func (q *Queries) GetAllInvoiceWithGivenDate(ctx context.Context, startDate time.Time, endDate time.Time, page, size int) ([]model2.Invoice, error) {
 
 	offset := (page - 1) * size
 
@@ -118,9 +118,9 @@ func (q *Queries) GetAllInvoiceWithGivenDate(ctx context.Context, startDate time
 	}
 	defer rows.Close()
 
-	var invoices []model.Invoice
+	var invoices []model2.Invoice
 	for rows.Next() {
-		var invoice model.Invoice
+		var invoice model2.Invoice
 		err := rows.Scan(
 			&invoice.InvoiceNumber,
 			&invoice.Date,
@@ -147,16 +147,16 @@ JOIN public.product p on invoice.invoice_number = p.invoice_number
 WHERE date BETWEEN $1 AND $2;
 `
 
-func (q *Queries) GetSumofAllInvoice(ctx context.Context, startDate time.Time, endDate time.Time) ([]model.Product, error) {
+func (q *Queries) GetSumofAllInvoice(ctx context.Context, startDate time.Time, endDate time.Time) ([]model2.Product, error) {
 	rows, err := q.db.Query(ctx, getSumofAllInvoice, startDate, endDate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
-	var invoices []model.Product
+	var invoices []model2.Product
 	for rows.Next() {
-		var inv model.Product
+		var inv model2.Product
 		if err := rows.Scan(&inv.InvoiceNumber, &inv.TotalCOGS, &inv.TotalPriceSold); err != nil {
 			return nil, fmt.Errorf("failed to scan invoice row: %w", err)
 		}

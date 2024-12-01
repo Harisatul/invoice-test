@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"golang.org/x/exp/slog"
-	"invoice-test/config"
+	config2 "invoice-test/config"
 	"invoice-test/internal/handler"
 	"invoice-test/internal/repository"
 	"invoice-test/internal/service"
@@ -23,9 +23,9 @@ func RegisterRoute(mux *http.ServeMux, handler handler.Handler) {
 
 func runHTTPServer(ctx context.Context) {
 
-	cfg := config.NewViper("app")
+	cfg := config2.NewViper("app")
 
-	db := config.NewDb(ctx, cfg)
+	db := config2.NewDb(ctx, cfg)
 	defer db.Close()
 
 	queries := repository.New(db)

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"invoice-test/internal/model"
+	model2 "invoice-test/internal/model"
 	"math/rand"
 	"net/http"
 	"time"
@@ -28,21 +28,21 @@ func InvoiceNumberGenerator() string {
 	return invoiceNumber
 }
 
-func ToPaymentStatus(input string) (model.PaymentStatus, error) {
+func ToPaymentStatus(input string) (model2.PaymentStatus, error) {
 	switch input {
-	case string(model.PaymentStatusCASH):
-		return model.PaymentStatusCASH, nil
-	case string(model.PaymentStatusCREDIT):
-		return model.PaymentStatusCREDIT, nil
+	case string(model2.PaymentStatusCASH):
+		return model2.PaymentStatusCASH, nil
+	case string(model2.PaymentStatusCREDIT):
+		return model2.PaymentStatusCREDIT, nil
 	default:
 		return "", errors.New("invalid payment status")
 	}
 }
 
-func CalculatePagination(page, pageSize, totalCount int) model.PaginationIndex {
+func CalculatePagination(page, pageSize, totalCount int) model2.PaginationIndex {
 	// Calculate pagination metadata
 	totalPages := (totalCount + pageSize - 1) / pageSize
-	return model.PaginationIndex{
+	return model2.PaginationIndex{
 		Page:        page,
 		PageSize:    pageSize,
 		TotalCount:  totalCount,
@@ -55,7 +55,7 @@ func CalculatePagination(page, pageSize, totalCount int) model.PaginationIndex {
 func WriteSuccessResponse(w http.ResponseWriter, status int, message string, data interface{}, index interface{}) {
 	w.Header().Add("content-type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(model.APIResponse{
+	json.NewEncoder(w).Encode(model2.APIResponse{
 		Status:          status,
 		Message:         message,
 		Data:            data,
@@ -65,7 +65,7 @@ func WriteSuccessResponse(w http.ResponseWriter, status int, message string, dat
 
 func WriteErrorResponse(w http.ResponseWriter, status int, message string, err interface{}) {
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(model.APIResponse{
+	json.NewEncoder(w).Encode(model2.APIResponse{
 		Status:  status,
 		Message: message,
 		Errors:  err,
