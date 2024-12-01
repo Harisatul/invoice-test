@@ -1,0 +1,189 @@
+{
+	"info": {
+		"_postman_id": "96657f51-0c68-458c-8bbd-0a77575b4125",
+		"name": "invoice-collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19967545"
+	},
+	"item": [
+		{
+			"name": "health-check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/health-check",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"health-check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "insert-invoice",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customer_name\": \"John Doe\",\n  \"sales_person_name\": \"Jane Smith\",\n  \"payment_type\": \"CREDIT\",\n  \"notes\": \"Thank you for your purchase!\",\n  \"product\": [\n    {\n      \"item_name\": \"Laptop\",\n      \"quantity\": 2,\n      \"total_cogs\": 1000000,\n      \"total_price_sold\": 1200000\n    },\n    {\n      \"item_name\": \"Wireless Mouse\",\n      \"quantity\": 1,\n      \"total_cogs\": 200000,\n      \"total_price_sold\": 250000\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/invoice",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"invoice"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-invoice",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customer_name\": \"John Doe\",\n  \"sales_person_name\": \"Jane Smith\",\n  \"payment_type\": \"CASH\",\n  \"notes\": \"Thank you for your purchase!\",\n  \"product\": [\n    {\n      \"item_name\": \"Laptop\",\n      \"quantity\": 2,\n      \"total_cogs\": 100000000,\n      \"total_price_sold\": 1200000\n    },\n    {\n      \"item_name\": \"Wireless Bud\",\n      \"quantity\": 1,\n      \"total_cogs\": 200000,\n      \"total_price_sold\": 250000\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/invoice?id=INV-3912-923979",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"invoice"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "INV-3912-923979"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/invoice?id=INV-5004-407761",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"invoice"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "INV-5004-407761"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-invoice",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/invoice?page=1&size=2&start_date=2024-11-26&end_date=2024-11-28",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"invoice"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "size",
+							"value": "2"
+						},
+						{
+							"key": "start_date",
+							"value": "2024-11-26"
+						},
+						{
+							"key": "end_date",
+							"value": "2024-11-28"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "import-invoice",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/home/harisatulaulia/Downloads/InvoiceImport (2).xlsx"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/invoice/import",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"invoice",
+						"import"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
